@@ -1,0 +1,3 @@
+discord.py
+fastf1
+flask
