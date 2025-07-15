@@ -42,6 +42,7 @@ async def on_ready():
 
 def keep_alive_and_run():
     keep_alive()
+    # TOKEN is now loaded from environment variable DISCORD_TOKEN via config.py
     bot.run(TOKEN)
 
 async def load_cogs(bot):
