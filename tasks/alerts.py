@@ -2,11 +2,11 @@ from discord.ext import commands, tasks
 import discord
 import fastf1
 import datetime
-from config import F1_CHANNEL_ID
-try:
-    from config import F1_YEAR
-except ImportError:
-    F1_YEAR = 2025
+import os
+from dotenv import load_dotenv
+load_dotenv()
+F1_CHANNEL_ID = int(os.environ["F1_CHANNEL_ID"])
+F1_YEAR = int(os.environ.get("F1_YEAR", 2025))
 
 class F1Alerts(commands.Cog):
     def __init__(self, bot):

@@ -1,12 +1,12 @@
+import os
+from dotenv import load_dotenv
 from discord import app_commands
 from discord.ext import commands
 import discord
 import fastf1
 from datetime import datetime
-try:
-    from config import F1_YEAR
-except ImportError:
-    F1_YEAR = 2025
+load_dotenv()
+F1_YEAR = int(os.environ.get("F1_YEAR", 2025))
 
 class NextRace(commands.Cog):
     def __init__(self, bot):

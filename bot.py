@@ -3,8 +3,12 @@ from discord.ext import commands
 import os
 from keep_alive import keep_alive
 import fastf1
+from dotenv import load_dotenv
 
 fastf1.Cache.enable_cache('fastf1_data')
+
+load_dotenv()
+TOKEN = os.environ["TOKEN"]
 
 intents = discord.Intents.default()
 intents.message_content = True

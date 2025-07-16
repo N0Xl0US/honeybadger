@@ -1,11 +1,11 @@
+import os
+from dotenv import load_dotenv
 from discord.ext import commands
 from discord import app_commands, Interaction, Embed
 import fastf1
 from fastf1.ergast import Ergast
-try:
-    from config import F1_YEAR
-except ImportError:
-    F1_YEAR = 2025
+load_dotenv()
+F1_YEAR = int(os.environ.get("F1_YEAR", 2025))
 
 class ConstructorStandings(commands.Cog):
     def __init__(self, bot):
