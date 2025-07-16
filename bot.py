@@ -1,11 +1,8 @@
 import discord
 from discord.ext import commands
 import os
-from config import TOKEN
-from config import F1_YEAR
 from keep_alive import keep_alive
 import fastf1
-from config import F1_CHANNEL_ID
 
 fastf1.Cache.enable_cache('fastf1_data')
 
@@ -17,7 +14,6 @@ class HoneybadgerBot(commands.Bot):
         super().__init__(*args, **kwargs)
 
     async def setup_hook(self):
-        # Load command extensions
         for filename in os.listdir("./commands"):
             if filename.endswith(".py") and filename != "__init__.py":
                 try:
@@ -25,10 +21,8 @@ class HoneybadgerBot(commands.Bot):
                     print(f"✅ Loaded: {filename}")
                 except Exception as e:
                     print(f"❌ Failed to load {filename}: {e}")
-        # Schedule loading cogs from tasks
         self.loop.create_task(load_cogs(self))
 
-# Bot Setup
 bot = HoneybadgerBot(command_prefix="!", intents=intents)
 
 @bot.event
@@ -42,7 +36,6 @@ async def on_ready():
 
 def keep_alive_and_run():
     keep_alive()
-    # TOKEN is now loaded from environment variable DISCORD_TOKEN via config.py
     bot.run(TOKEN)
 
 async def load_cogs(bot):
