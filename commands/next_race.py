@@ -13,6 +13,7 @@ class NextRace(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="next_race", description="Get info on the next Formula 1 race")
+    @commands.cooldown(rate=1, per=5.0, type=commands.BucketType.user)
     async def next_race(self, interaction: discord.Interaction):
         try:
             now = datetime.utcnow()

@@ -12,6 +12,7 @@ class DriverStandings(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="driver_standings", description="View current F1 driver championship standings")
+    @commands.cooldown(rate=1, per=5.0, type=commands.BucketType.user)
     async def driver_standings(self, interaction: Interaction):
         await interaction.response.defer()  # Show "thinking..." status
         try:
