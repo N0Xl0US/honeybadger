@@ -24,7 +24,7 @@ class NextRace(commands.Cog):
                     try:
                         race_event = fastf1.get_event(F1_YEAR, event['RoundNumber'])
                         race_session = race_event.get_session('Race')
-                        try:
+                        try: 
                             race_session.load()
                             race_start_time = race_session.session_start_time
                             time_note = ""
