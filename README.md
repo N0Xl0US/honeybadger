@@ -16,7 +16,7 @@ Honeybadger is a Python-based bot designed to provide Formula 1 data and alerts.
 
 1. **Clone the repository:**
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/N0Xl0US/honeybadger
    cd honeybadger
    ```
 2. **Install dependencies:**
