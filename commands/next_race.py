@@ -20,9 +20,16 @@ class NextRace(commands.Cog):
             for _, event in schedule.iterrows():
                 event_date = event['EventDate'].to_pydatetime()
                 if event_date > now:
+                    # Get the actual race session start time
+                    try:
+                        race_event = fastf1.get_event(F1_YEAR, event['RoundNumber'])
+                        race_session = race_event.get_session('Race')
+                        race_start_time = race_session.session_start_time
+                    except Exception as e:
+                        race_start_time = event_date  # fallback
                     embed = discord.Embed(
                         title=f"Next Race: {event['EventName']}",
-                        description=f"📍 {event['Location']}\n🗓️ {event_date.strftime('%A, %d %B %Y')}\n🕒 {event_date.strftime('%H:%M UTC')}",
+                        description=f"\U0001F4CD {event['Location']}\n\U0001F4C5 {race_start_time.strftime('%A, %d %B %Y')}\n\U0001F552 {race_start_time.strftime('%H:%M UTC')}",
                         color=discord.Color.green()
                     )
                     embed.set_footer(text="Honeybadger F1 Bot • FastF1")
