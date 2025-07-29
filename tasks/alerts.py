@@ -16,24 +16,36 @@ class F1Alerts(commands.Cog):
         self.session_results_sent = set()
         try:
             self.schedule = fastf1.get_event_schedule(F1_YEAR)
+            print(f"✅ Loaded F1 schedule for {F1_YEAR}")
         except Exception as e:
-            print(f"Failed to get event schedule: {e}")
+            print(f"❌ Failed to get event schedule: {e}")
             self.schedule = []
         self.check_sessions.start()
 
     def get_upcoming_sessions(self):
         today = datetime.datetime.utcnow().date()
         sessions = []
-        for _, event in getattr(self.schedule, 'iterrows', lambda:[])():
+        
+        if not hasattr(self.schedule, 'iterrows'):
+            print("❌ Schedule is not a DataFrame")
+            return sessions
+            
+        for _, event in self.schedule.iterrows():
             if event['EventDate'].date() >= today:
-                for session_type in ['Practice 1', 'Practice 2', 'Practice 3', 'Qualifying', 'Sprint', 'Race']:
+                # Use correct FastF1 session names
+                session_types = ['FP1', 'FP2', 'FP3', 'Q', 'S', 'R']
+                session_names = ['Practice 1', 'Practice 2', 'Practice 3', 'Qualifying', 'Sprint', 'Race']
+                
+                for session_type, session_name in zip(session_types, session_names):
                     try:
-                        session = fastf1.get_event(F1_YEAR, event['RoundNumber']).get_session(session_type)
+                        event_obj = fastf1.get_event(F1_YEAR, event['RoundNumber'])
+                        session = event_obj.get_session(session_type)
                         session_time = session.session_start_time
                         end_time = session.session_end_time
-                        sessions.append((session_type, event['EventName'], session_time, end_time, event['RoundNumber']))
+                        sessions.append((session_name, event['EventName'], session_time, end_time, event['RoundNumber'], session_type))
+                        print(f"✅ Found session: {session_name} for {event['EventName']} at {session_time}")
                     except Exception as e:
-                        print(f"Failed to get session {session_type} for event {event['EventName']}: {e}")
+                        print(f"❌ Failed to get session {session_type} for event {event['EventName']}: {e}")
                         continue
         return sessions
 
@@ -43,43 +55,55 @@ class F1Alerts(commands.Cog):
         if not channel:
             print("⚠️ F1 channel not found.")
             return
+            
         now = datetime.datetime.utcnow()
+        print(f"🕐 Checking sessions at {now}")
+        
         try:
             sessions = self.get_upcoming_sessions()
+            print(f"📋 Found {len(sessions)} upcoming sessions")
         except Exception as e:
-            print(f"Failed to get upcoming sessions: {e}")
+            print(f"❌ Failed to get upcoming sessions: {e}")
             return
-        for session_type, event_name, start_time, end_time, round_number in sessions:
-            key = (session_type, event_name)
-            # 🔔 8 Hours Before Alert
+            
+        for session_name, event_name, start_time, end_time, round_number, session_type in sessions:
+            key = (session_name, event_name)
             minutes_until_start = (start_time - now).total_seconds() / 60
+            
+            print(f"🔍 Checking {session_name} for {event_name}: {minutes_until_start:.1f} minutes until start")
+            
+            # 🔔 8 Hours Before Alert
             if 470 <= minutes_until_start <= 490:
                 if key not in self.eight_hour_alerts_sent:
                     try:
                         embed = discord.Embed(
-                            title=f"⏰ {session_type} in 8 Hours",
-                            description=f"**{event_name}** {session_type} starts at {start_time.strftime('%H:%M UTC')}",
+                            title=f"⏰ {session_name} in 8 Hours",
+                            description=f"**{event_name}** {session_name} starts at {start_time.strftime('%H:%M UTC')}",
                             color=discord.Color.gold()
                         )
                         embed.set_footer(text="Honeybadger F1 Bot • FastF1")
                         await channel.send(embed=embed)
                         self.eight_hour_alerts_sent.add(key)
+                        print(f"✅ Sent 8 hour alert for {key}")
                     except Exception as e:
-                        print(f"Failed to send 8 hour alert: {e}")
+                        print(f"❌ Failed to send 8 hour alert: {e}")
+                        
             # 🕐 15 Min Before Alert
             if 0 <= minutes_until_start <= 15:
                 if key not in self.session_alerts_sent:
                     try:
                         embed = discord.Embed(
-                            title=f"🏁 {session_type} Starting Soon!",
-                            description=f"{event_name} {session_type} starts at **{start_time.strftime('%H:%M UTC')}**",
+                            title=f"🏁 {session_name} Starting Soon!",
+                            description=f"{event_name} {session_name} starts at **{start_time.strftime('%H:%M UTC')}**",
                             color=discord.Color.red()
                         )
                         embed.set_footer(text="Honeybadger F1 Bot • FastF1")
                         await channel.send(embed=embed)
                         self.session_alerts_sent.add(key)
+                        print(f"✅ Sent 15 min alert for {key}")
                     except Exception as e:
-                        print(f"Failed to send 15 min alert: {e}")
+                        print(f"❌ Failed to send 15 min alert: {e}")
+                        
             # ✅ Session Results (After End)
             minutes_after_end = (now - end_time).total_seconds() / 60
             if 0 <= minutes_after_end <= 30:
@@ -88,9 +112,9 @@ class F1Alerts(commands.Cog):
                         session = fastf1.get_session(F1_YEAR, round_number, session_type)
                         session.load()
                         results = session.results
-                        if results is not None:
+                        if results is not None and not results.empty:
                             embed = discord.Embed(
-                                title=f"📊 {session_type} Results - {event_name}",
+                                title=f"📊 {session_name} Results - {event_name}",
                                 color=discord.Color.green()
                             )
                             for i, row in results.head(10).iterrows():
@@ -105,11 +129,16 @@ class F1Alerts(commands.Cog):
                             embed.set_footer(text="Honeybadger F1 Bot • Powered by FastF1")
                             await channel.send(embed=embed)
                             self.session_results_sent.add(key)
+                            print(f"✅ Sent results for {key}")
+                        else:
+                            print(f"⚠️ No results available for {key}")
                     except Exception as e:
                         print(f"⚠️ Failed to fetch results for {key}: {e}")
+
     @check_sessions.before_loop
     async def before_check(self):
         await self.bot.wait_until_ready()
+        print("🚀 F1 Alerts task started")
 
 async def setup(bot):
     await bot.add_cog(F1Alerts(bot))
