@@ -18,22 +18,18 @@ class TestAlerts(commands.Cog):
         await interaction.response.defer()
         
         try:
-            # Test schedule loading
             schedule = fastf1.get_event_schedule(F1_YEAR)
             embed = discord.Embed(
                 title="🔧 F1 Alerts Test Results",
                 color=discord.Color.blue()
             )
             
-            # Test upcoming sessions
             today = datetime.datetime.utcnow().date()
             upcoming_sessions = []
             
             for _, event in schedule.iterrows():
                 if event['EventDate'].date() >= today:
                     event_obj = fastf1.get_event(F1_YEAR, event['RoundNumber'])
-                    
-                    # Test different session types
                     session_types = ['FP1', 'FP2', 'FP3', 'Q', 'S', 'R']
                     session_names = ['Practice 1', 'Practice 2', 'Practice 3', 'Qualifying', 'Sprint', 'Race']
                     
@@ -59,7 +55,6 @@ class TestAlerts(commands.Cog):
                     inline=False
                 )
                 
-                # Show next 3 sessions
                 for i, session in enumerate(upcoming_sessions[:3]):
                     embed.add_field(
                         name=f"{i+1}. {session['name']} - {session['event']}",

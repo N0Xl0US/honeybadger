@@ -14,7 +14,7 @@ class DriverStandings(commands.Cog):
     @app_commands.command(name="driver_standings", description="View current F1 driver championship standings")
     @commands.cooldown(rate=1, per=5.0, type=commands.BucketType.user)
     async def driver_standings(self, interaction: Interaction):
-        await interaction.response.defer()  # Show "thinking..." status
+        await interaction.response.defer() 
         try:
             ergast = Ergast()
             standings = ergast.get_driver_standings(season=F1_YEAR).content
@@ -31,7 +31,6 @@ class DriverStandings(commands.Cog):
                 given = getattr(row, 'givenName', '')
                 family = getattr(row, 'familyName', '')
                 name = f"{given} {family}".strip() or getattr(row, 'driverName', 'Unknown')
-                # constructorNames is a list, get first element
                 team = getattr(row, 'constructorNames', ['Unknown'])
                 if isinstance(team, list):
                     team = team[0] if team else 'Unknown'

@@ -24,7 +24,6 @@ class ManualAlert(commands.Cog):
                 await interaction.followup.send("❌ F1 channel not found.")
                 return
             
-            # Send a test alert
             embed = discord.Embed(
                 title="🧪 Manual Test Alert",
                 description="This is a test alert to verify the bot is working correctly.",

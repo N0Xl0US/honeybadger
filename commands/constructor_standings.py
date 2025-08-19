@@ -14,7 +14,7 @@ class ConstructorStandings(commands.Cog):
     @app_commands.command(name="constructor_standings", description="View current F1 constructors championship standings")
     @commands.cooldown(rate=1, per=5.0, type=commands.BucketType.user)
     async def constructor_standings(self, interaction: Interaction):
-        await interaction.response.defer()  # Shows "thinking..." status
+        await interaction.response.defer()
         try:
             ergast = Ergast()
             standings = ergast.get_constructor_standings(season=F1_YEAR).content

@@ -32,7 +32,6 @@ class F1Alerts(commands.Cog):
             
         for _, event in self.schedule.iterrows():
             if event['EventDate'].date() >= today:
-                # Use correct FastF1 session names
                 session_types = ['FP1', 'FP2', 'FP3', 'Q', 'S', 'R']
                 session_names = ['Practice 1', 'Practice 2', 'Practice 3', 'Qualifying', 'Sprint', 'Race']
                 
@@ -72,7 +71,6 @@ class F1Alerts(commands.Cog):
             
             print(f"🔍 Checking {session_name} for {event_name}: {minutes_until_start:.1f} minutes until start")
             
-            # 🔔 8 Hours Before Alert
             if 470 <= minutes_until_start <= 490:
                 if key not in self.eight_hour_alerts_sent:
                     try:
@@ -88,7 +86,6 @@ class F1Alerts(commands.Cog):
                     except Exception as e:
                         print(f"❌ Failed to send 8 hour alert: {e}")
                         
-            # 🕐 15 Min Before Alert
             if 0 <= minutes_until_start <= 15:
                 if key not in self.session_alerts_sent:
                     try:
@@ -104,7 +101,7 @@ class F1Alerts(commands.Cog):
                     except Exception as e:
                         print(f"❌ Failed to send 15 min alert: {e}")
                         
-            # ✅ Session Results (After End)
+            # Session Results
             minutes_after_end = (now - end_time).total_seconds() / 60
             if 0 <= minutes_after_end <= 30:
                 if key not in self.session_results_sent:
